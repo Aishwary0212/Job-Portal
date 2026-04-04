@@ -64,5 +64,20 @@ export const jobsApi = {
   updateJob: (id, payload) => apiRequest(API_ENDPOINTS.updateJob(id), {
     method: 'PUT',
     body: JSON.stringify(payload)
+  }),
+  deleteJob: (id) => apiRequest(API_ENDPOINTS.deleteJob(id), {
+    method: 'DELETE'
+  })
+}
+
+export const applicationsApi = {
+  getMine: () => apiRequest(API_ENDPOINTS.myApplications),
+  getAll: () => apiRequest(API_ENDPOINTS.applications),
+  applyToJob: (jobId) => apiRequest(API_ENDPOINTS.applyToJob(jobId), {
+    method: 'POST'
+  }),
+  updateStatus: (id, status) => apiRequest(API_ENDPOINTS.updateApplicationStatus(id), {
+    method: 'PUT',
+    body: JSON.stringify({ status })
   })
 }

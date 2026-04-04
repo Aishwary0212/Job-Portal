@@ -9,5 +9,10 @@ export const API_ENDPOINTS = {
   jobs: '/api/jobs',
   createJob: '/api/jobs',
   jobDetails: (id) => `/api/jobs/${id}`,
-  updateJob: (id) => `/api/jobs/${id}`
+  updateJob: (id) => `/api/jobs/${id}`,
+  deleteJob: (id) => `/api/jobs/${id}`,
+  applications: '/api/applications',
+  myApplications: '/api/applications/mine',
+  applyToJob: (jobId) => `/api/applications/${jobId}`,
+  updateApplicationStatus: (id) => `/api/applications/${id}/status`
 }

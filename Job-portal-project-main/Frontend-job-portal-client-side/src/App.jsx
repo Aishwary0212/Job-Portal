@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Home from './Components/Homepage/Home'
 import Dashboard from './Components/Dashboard/Dashboard'
 import AdminDashboard from './Components/Admin/AdminDashboard'
+import AdminRoute from './Components/AdminRoute'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import EditProfile from './pages/EditProfile'
@@ -48,7 +49,11 @@ function App() {
           </RecruiterRoute>
         } />
         <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/dashboard" element={
+          <AdminRoute>
+            <AdminDashboard />
+          </AdminRoute>
+        } />
 
       </Routes>
     </BrowserRouter>

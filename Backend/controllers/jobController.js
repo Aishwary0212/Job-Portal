@@ -1,4 +1,5 @@
 import Job from "../models/Job.js";
+import Application from "../models/Application.js";
 
 // Create Job (Recruiter)
 export const createJob = async (req, res) => {
@@ -32,7 +33,17 @@ export const getJobs = async (req, res) => {
       .populate("createdBy", "name email")
       .sort({ createdAt: -1 });
 
-    res.json(jobs);
+    const jobsWithCounts = await Promise.all(
+      jobs.map(async (job) => {
+        const applicationsCount = await Application.countDocuments({ job: job._id });
+        return {
+          ...job.toObject(),
+          applicationsCount
+        };
+      })
+    );
+
+    res.json(jobsWithCounts);
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -46,7 +57,12 @@ export const getJobById = async (req, res) => {
       return res.status(404).json({ message: "Job not found" });
     }
 
-    res.json(job);
+    const applicationsCount = await Application.countDocuments({ job: job._id });
+
+    res.json({
+      ...job.toObject(),
+      applicationsCount
+    });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }
@@ -60,7 +76,10 @@ export const updateJob = async (req, res) => {
       return res.status(404).json({ message: "Job not found" });
     }
 
-    if (job.createdBy.toString() !== req.user._id.toString()) {
+    if (
+      req.user.role !== "admin" &&
+      job.createdBy.toString() !== req.user._id.toString()
+    ) {
       return res.status(403).json({ message: "You can only edit your own jobs" });
     }
 
@@ -75,6 +94,30 @@ export const updateJob = async (req, res) => {
     const populatedJob = await updatedJob.populate("createdBy", "name email");
 
     res.json(populatedJob);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const deleteJob = async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ message: "Job not found" });
+    }
+
+    if (
+      req.user.role !== "admin" &&
+      job.createdBy?.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({ message: "You can only delete your own jobs" });
+    }
+
+    await Application.deleteMany({ job: job._id });
+    await job.deleteOne();
+
+    res.json({ message: "Job deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: "Server error" });
   }

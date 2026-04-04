@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Jobs.css'
-import { jobsApi } from '../utils/api'
+import { applicationsApi, jobsApi } from '../utils/api'
 import { getStoredUser } from '../utils/auth'
-import { hasAppliedToJob } from '../utils/applications'
 import AppNavbar from '../components/AppNavbar'
 
 const Jobs = () => {
@@ -16,13 +15,19 @@ const Jobs = () => {
   const [loading,      setLoading]      = useState(true)
   const [error,        setError]        = useState('')
   const [user] = useState(() => getStoredUser())
+  const [appliedJobIds, setAppliedJobIds] = useState([])
 
   useEffect(() => {
     const loadJobs = async () => {
       try {
         setLoading(true)
-        const data = await jobsApi.getJobs()
-        setJobs(data)
+        const [jobsData, applicationsData] = await Promise.all([
+          jobsApi.getJobs(),
+          user?.role === 'candidate' ? applicationsApi.getMine() : Promise.resolve([])
+        ])
+
+        setJobs(jobsData)
+        setAppliedJobIds(applicationsData.map((application) => application.job?._id).filter(Boolean))
       } catch (loadError) {
         setError(loadError.message)
       } finally {
@@ -31,7 +36,7 @@ const Jobs = () => {
     }
 
     loadJobs()
-  }, [])
+  }, [user?.role])
 
   const filtered = jobs.filter(j =>
     j.title.toLowerCase().includes(search.toLowerCase()) &&
@@ -44,14 +49,15 @@ const Jobs = () => {
   })
 
   const canEditJob = (job) =>
-    user?.role === 'recruiter' &&
-    job?.createdBy?._id &&
-    user?._id === job.createdBy._id
+    (user?.role === 'admin') ||
+    (user?.role === 'recruiter' &&
+      job?.createdBy?._id &&
+      user?._id === job.createdBy._id)
 
   const isAppliedJob = (job) =>
-    user?.role !== 'recruiter' &&
+    user?.role === 'candidate' &&
     user?._id &&
-    hasAppliedToJob(user._id, job._id)
+    appliedJobIds.includes(job._id)
 
   return (
     <div className="jobs-page">
@@ -125,6 +131,7 @@ const Jobs = () => {
                 })}</p>
                 <p>📍 {job.location}</p>
                 <p>💼 {job.type || 'Full-Time'}</p>
+                <p>👥 {job.applicationsCount || 0} applied</p>
                 <p><span className="card-status">{(job.status || 'Open').toUpperCase()}</span></p>
               </div>
 

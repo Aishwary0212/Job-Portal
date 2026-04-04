@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './Dashboard.css'
-import { authApi, jobsApi } from '../../utils/api'
+import { applicationsApi, authApi } from '../../utils/api'
 import { clearAuthData, getStoredUser, setAuthData } from '../../utils/auth'
-import { getApplicationsForRecruiter, getApplicationsForUser } from '../../utils/applications'
 import AppNavbar from '../../components/AppNavbar'
 
 const Dashboard = () => {
@@ -11,13 +10,14 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('profile')
   const [sidebarOpen] = useState(true)
   const [user, setUser] = useState(() => getStoredUser() || {})
-  const [postedJobs, setPostedJobs] = useState([])
+  const [applications, setApplications] = useState([])
 
   useEffect(() => {
     const syncProfile = async () => {
       try {
         const data = await authApi.getMe()
         setAuthData({
+          token: localStorage.getItem('token') || undefined,
           user: {
             _id: data._id,
             username: data.username || data.name,
@@ -51,21 +51,21 @@ const Dashboard = () => {
   }, [navigate])
 
   useEffect(() => {
-    const loadRecruiterJobs = async () => {
-      if (user.role !== 'recruiter' || !user._id) {
-        setPostedJobs([])
+    const loadApplications = async () => {
+      if (!user._id || user.role === 'admin') {
+        setApplications([])
         return
       }
 
       try {
-        const jobs = await jobsApi.getJobs()
-        setPostedJobs(jobs.filter((job) => job.createdBy?._id === user._id))
+        const data = await applicationsApi.getMine()
+        setApplications(data)
       } catch {
-        setPostedJobs([])
+        setApplications([])
       }
     }
 
-    loadRecruiterJobs()
+    loadApplications()
   }, [user._id, user.role])
 
   return (
@@ -173,15 +173,7 @@ const Dashboard = () => {
               </h2>
               {(() => {
                 if (user.role === 'recruiter') {
-                  const jobApplications = getApplicationsForRecruiter(user._id, postedJobs)
-                    .map((application) => ({
-                      ...application,
-                      postedJobTitle:
-                        postedJobs.find((job) => String(job._id) === String(application.jobId))?.title ||
-                        application.jobTitle
-                    }))
-
-                  if (jobApplications.length === 0) {
+                  if (applications.length === 0) {
                     return (
                       <div className="empty-state">
                         <div className="empty-icon">📋</div>
@@ -192,19 +184,17 @@ const Dashboard = () => {
 
                   return (
                     <div className="profile-info">
-                      {jobApplications.map((application) => (
-                        <div key={application.id} className="info-row">
-                          <span className="info-label">{application.userName} :</span>
+                      {applications.map((application) => (
+                        <div key={application._id} className="info-row">
+                          <span className="info-label">{application.candidate?.name || 'Candidate'} :</span>
                           <span className="info-value">
-                            {application.postedJobTitle} ({application.status})
+                            {application.job?.title || 'Job'} ({application.status})
                           </span>
                         </div>
                       ))}
                     </div>
                   )
                 }
-
-                const applications = getApplicationsForUser(user._id)
 
                 if (applications.length === 0) {
                   return (
@@ -218,8 +208,8 @@ const Dashboard = () => {
                 return (
                   <div className="profile-info">
                     {applications.map((application) => (
-                      <div key={application.id} className="info-row">
-                        <span className="info-label">{application.jobTitle} :</span>
+                      <div key={application._id} className="info-row">
+                        <span className="info-label">{application.job?.title || 'Job'} :</span>
                         <span className="info-value">{application.status}</span>
                       </div>
                     ))}

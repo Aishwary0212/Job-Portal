@@ -9,6 +9,10 @@ const AppNavbar = () => {
   const user = getStoredUser()
 
   const isActive = (path) => {
+    if (path === '/dashboard' && location.pathname.startsWith('/admin/dashboard')) {
+      return user?.role === 'admin'
+    }
+
     if (path === '/') {
       return location.pathname === '/'
     }
@@ -38,12 +42,12 @@ const AppNavbar = () => {
         {user ? (
           <>
             <Link
-              to="/dashboard"
+              to={user.role === 'admin' ? '/admin/dashboard' : '/dashboard'}
               className={isActive('/dashboard') ? 'app-nav-link active' : 'app-nav-link'}
             >
-              Dashboard
+              {user.role === 'admin' ? 'Admin Panel' : 'Dashboard'}
             </Link>
-            {user.role === 'recruiter' && (
+            {['recruiter', 'admin'].includes(user.role) && (
               <Link
                 to="/jobs/create"
                 className={isActive('/jobs/create') ? 'app-nav-link active' : 'app-nav-link'}

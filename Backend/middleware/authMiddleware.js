@@ -31,3 +31,19 @@ export const recruiterOnly = (req, res, next) => {
 
   next();
 };
+
+export const adminOnly = (req, res, next) => {
+  if (req.user?.role !== "admin") {
+    return res.status(403).json({ message: "Admin access only" });
+  }
+
+  next();
+};
+
+export const recruiterOrAdmin = (req, res, next) => {
+  if (!["recruiter", "admin"].includes(req.user?.role)) {
+    return res.status(403).json({ message: "Recruiter or admin access only" });
+  }
+
+  next();
+};

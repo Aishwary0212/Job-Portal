@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { jobsApi } from '../utils/api'
+import { applicationsApi, jobsApi } from '../utils/api'
 import { getStoredUser } from '../utils/auth'
-import { hasAppliedToJob, saveApplication } from '../utils/applications'
 import AppNavbar from '../components/AppNavbar'
 
 const JobDetails = () => {
@@ -21,9 +20,7 @@ const JobDetails = () => {
         setLoading(true)
         const data = await jobsApi.getJobById(id)
         setJob(data)
-        if (user?._id) {
-          setApplied(hasAppliedToJob(user._id, data._id))
-        }
+        setApplied(Boolean(data.hasApplied))
       } catch (loadError) {
         setError(loadError.message)
       } finally {
@@ -34,7 +31,7 @@ const JobDetails = () => {
     loadJob()
   }, [id, user?._id])
 
-  const handleApply = () => {
+  const handleApply = async () => {
     setError('')
     setSuccess('')
 
@@ -43,39 +40,30 @@ const JobDetails = () => {
       return
     }
 
-    if (user.role === 'recruiter') {
-      setError('Recruiters cannot apply to jobs.')
+    if (user.role !== 'candidate') {
+      setError('Only candidates can apply to jobs.')
       return
     }
 
-    if (hasAppliedToJob(user._id, job._id)) {
+    try {
+      await applicationsApi.applyToJob(job._id)
       setApplied(true)
-      setSuccess('You have already applied to this job.')
-      return
+      setSuccess('Application submitted successfully.')
+      setJob((currentJob) => ({
+        ...currentJob,
+        applicationsCount: (currentJob?.applicationsCount || 0) + 1,
+        hasApplied: true
+      }))
+    } catch (applyError) {
+      setError(applyError.message)
     }
-
-    saveApplication({
-      id: `${user._id}-${job._id}`,
-      userId: user._id,
-      userName: user.username || user.name,
-      userEmail: user.email,
-      recruiterId: job.createdBy?._id || '',
-      recruiterName: job.createdBy?.name || '',
-      jobId: job._id,
-      jobTitle: job.title,
-      company: job.company,
-      appliedAt: new Date().toISOString(),
-      status: 'Applied'
-    })
-
-    setApplied(true)
-    setSuccess('Application submitted successfully.')
   }
 
   const canEdit =
-    user?.role === 'recruiter' &&
-    job?.createdBy?._id &&
-    user?._id === job.createdBy._id
+    user?.role === 'admin' ||
+    (user?.role === 'recruiter' &&
+      job?.createdBy?._id &&
+      user?._id === job.createdBy._id)
 
   return (
     <>
@@ -117,6 +105,10 @@ const JobDetails = () => {
             <div className="form-field">
               <label>Posted By</label>
               <input value={job.createdBy?.name || 'Unknown'} readOnly />
+            </div>
+            <div className="form-field">
+              <label>Total Applications</label>
+              <input value={job.applicationsCount || 0} readOnly />
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>

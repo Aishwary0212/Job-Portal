@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { authApi } from '../utils/api'
+import { setAuthData } from '../utils/auth'
 
 const AdminLogin = () => {
   const navigate = useNavigate()
@@ -17,12 +19,28 @@ const AdminLogin = () => {
     }
     setLoading(true)
     try {
-      if (email === 'admin@gmail.com' && password === 'admin123') {
-        localStorage.setItem('admin', JSON.stringify({ email, role: 'admin' }))
-        navigate('/admin/dashboard')
-      } else {
-        setError('Invalid credentials. Use admin@gmail.com / admin123')
+      const data = await authApi.login({ email, password })
+
+      if (data.role !== 'admin') {
+        throw new Error('This account does not have admin access.')
       }
+
+      setAuthData({
+        token: data.token,
+        user: {
+          _id: data._id,
+          username: data.username || data.name,
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          location: data.location,
+          resumeLink: data.resumeLink,
+          gender: data.gender,
+          createdAt: data.createdAt
+        }
+      })
+
+        navigate('/admin/dashboard')
     } catch (err) {
       setError(err.message || 'Login failed.')
     } finally {
@@ -43,7 +61,7 @@ const AdminLogin = () => {
             <label>Email</label>
             <input
               type="email"
-              placeholder="admin@gmail.com"
+              placeholder="admin@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -71,7 +89,7 @@ const AdminLogin = () => {
             style={{ color: '#2563eb', cursor: 'pointer', fontWeight: 600 }}
             onClick={() => navigate('/login')}
           >
-          Back to User Login
+            Back to User Login
           </span>
         </p>
       </div>
