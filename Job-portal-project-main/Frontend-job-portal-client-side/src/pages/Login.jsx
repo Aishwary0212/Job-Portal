@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { authApi } from '../utils/api'
 import { setAuthData } from '../utils/auth'
 
@@ -19,11 +20,15 @@ const Login = () => {
     setSuccess('')
 
     if (!email.trim() || !password.trim()) {
-      setError('Please fill in all fields.')
+      const message = 'Please fill in all fields.'
+      setError(message)
+      toast.error(message)
       return
     }
     if (!/\S+@\S+\.\S+/.test(email)) {
-      setError('Please enter a valid email address.')
+      const message = 'Please enter a valid email address.'
+      setError(message)
+      toast.error(message)
       return
     }
 
@@ -48,9 +53,11 @@ const Login = () => {
       })
 
       setSuccess('Login successful! Redirecting...')
+      toast.success('Login successful!')
       setTimeout(() => navigate('/Jobs'), 1200)
     } catch (err) {
       setError(err.message)
+      toast.error(err.message || 'Login failed.')
     } finally {
       setLoading(false)
     }

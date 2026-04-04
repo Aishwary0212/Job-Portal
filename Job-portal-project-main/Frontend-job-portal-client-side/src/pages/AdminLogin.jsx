@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { authApi } from '../utils/api'
 import { setAuthData } from '../utils/auth'
 
@@ -14,7 +15,9 @@ const AdminLogin = () => {
     e.preventDefault()
     setError('')
     if (!email.trim() || !password.trim()) {
-      setError('Please fill in all fields.')
+      const message = 'Please fill in all fields.'
+      setError(message)
+      toast.error(message)
       return
     }
     setLoading(true)
@@ -40,9 +43,11 @@ const AdminLogin = () => {
         }
       })
 
-        navigate('/admin/dashboard')
+      toast.success('Admin login successful!')
+      navigate('/admin/dashboard')
     } catch (err) {
       setError(err.message || 'Login failed.')
+      toast.error(err.message || 'Login failed.')
     } finally {
       setLoading(false)
     }

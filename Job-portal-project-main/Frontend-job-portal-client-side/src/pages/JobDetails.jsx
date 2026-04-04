@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { applicationsApi, jobsApi } from '../utils/api'
 import { getStoredUser } from '../utils/auth'
 import AppNavbar from '../components/AppNavbar'
@@ -23,6 +24,7 @@ const JobDetails = () => {
         setApplied(Boolean(data.hasApplied))
       } catch (loadError) {
         setError(loadError.message)
+        toast.error(loadError.message || 'Failed to load job details.')
       } finally {
         setLoading(false)
       }
@@ -41,7 +43,9 @@ const JobDetails = () => {
     }
 
     if (user.role !== 'candidate') {
-      setError('Only candidates can apply to jobs.')
+      const message = 'Only candidates can apply to jobs.'
+      setError(message)
+      toast.error(message)
       return
     }
 
@@ -49,6 +53,7 @@ const JobDetails = () => {
       await applicationsApi.applyToJob(job._id)
       setApplied(true)
       setSuccess('Application submitted successfully.')
+      toast.success('Application submitted successfully!')
       setJob((currentJob) => ({
         ...currentJob,
         applicationsCount: (currentJob?.applicationsCount || 0) + 1,
@@ -56,6 +61,7 @@ const JobDetails = () => {
       }))
     } catch (applyError) {
       setError(applyError.message)
+      toast.error(applyError.message || 'Failed to apply.')
     }
   }
 

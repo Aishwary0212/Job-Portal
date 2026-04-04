@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import './AdminDashboard.css'
 import { applicationsApi, jobsApi } from '../../utils/api'
 import { clearAuthData } from '../../utils/auth'
@@ -46,6 +47,7 @@ const AdminDashboard = () => {
       setApplications(applicationsData)
     } catch (loadError) {
       setError(loadError.message)
+      toast.error(loadError.message || 'Failed to load admin data.')
     } finally {
       setLoading(false)
     }
@@ -62,7 +64,9 @@ const AdminDashboard = () => {
 
   const addJob = async () => {
     if (!newJob.title.trim() || !newJob.company.trim() || !newJob.location.trim()) {
-      setFormError('Title, company, and location are required.')
+      const message = 'Title, company, and location are required.'
+      setFormError(message)
+      toast.error(message)
       return
     }
 
@@ -72,9 +76,11 @@ const AdminDashboard = () => {
       await jobsApi.createJob(newJob)
       setNewJob(initialJobForm)
       setShowForm(false)
+      toast.success('Job added successfully!')
       await loadAdminData()
     } catch (saveError) {
       setFormError(saveError.message)
+      toast.error(saveError.message || 'Failed to add job.')
     } finally {
       setSaving(false)
     }
@@ -90,8 +96,10 @@ const AdminDashboard = () => {
         currentApplications.filter((application) => application.job?._id !== id)
       )
       setSuccess('Job deleted successfully.')
+      toast.success('Job deleted successfully!')
     } catch (deleteError) {
       setError(deleteError.message)
+      toast.error(deleteError.message || 'Failed to delete job.')
     }
   }
 
@@ -110,10 +118,12 @@ const AdminDashboard = () => {
       await applicationsApi.updateStatus(id, status)
 
       setSuccess(`Application ${status.toLowerCase()} successfully.`)
+      toast.success(`Application ${status.toLowerCase()} successfully.`)
       await loadAdminData()
     } catch (updateError) {
       await loadAdminData()
       setError(updateError.message)
+      toast.error(updateError.message || 'Failed to update application.')
     } finally {
       setUpdatingId('')
     }

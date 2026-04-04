@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { authApi } from '../utils/api'
 import { setAuthData } from '../utils/auth'
 
@@ -31,7 +32,11 @@ const Register = () => {
     setSuccess('')
 
     const err = validate()
-    if (err) { setError(err); return }
+    if (err) {
+      setError(err)
+      toast.error(err)
+      return
+    }
 
     try {
       setLoading(true)
@@ -58,9 +63,11 @@ const Register = () => {
       })
 
       setSuccess('Account created! Redirecting...')
+      toast.success('Account created successfully!')
       setTimeout(() => navigate('/dashboard'), 1200)
     } catch (submitError) {
       setError(submitError.message)
+      toast.error(submitError.message || 'Registration failed.')
     } finally {
       setLoading(false)
     }

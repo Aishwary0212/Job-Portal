@@ -1,5 +1,6 @@
 import React from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
 
 import Home from './Components/Homepage/Home'
 import Dashboard from './Components/Dashboard/Dashboard'
@@ -21,6 +22,27 @@ import './App.css'
 function App() {
   return (
     <BrowserRouter>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#0f172a',
+            color: '#f8fafc',
+            border: '1px solid #1e293b'
+          },
+          success: {
+            style: {
+              border: '1px solid #16a34a'
+            }
+          },
+          error: {
+            style: {
+              border: '1px solid #dc2626'
+            }
+          }
+        }}
+      />
       <Routes>
 
         <Route path="/" element={<Home />} />

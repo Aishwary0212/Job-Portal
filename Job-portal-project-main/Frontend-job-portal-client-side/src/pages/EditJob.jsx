@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { jobsApi } from '../utils/api'
 import AppNavbar from '../components/AppNavbar'
 
@@ -33,6 +34,7 @@ const EditJob = () => {
         })
       } catch (loadError) {
         setError(loadError.message)
+        toast.error(loadError.message || 'Failed to load job.')
       } finally {
         setLoading(false)
       }
@@ -51,7 +53,9 @@ const EditJob = () => {
     setSuccess('')
 
     if (!form.title.trim() || !form.company.trim() || !form.location.trim()) {
-      setError('Please fill in title, company, and location.')
+      const message = 'Please fill in title, company, and location.'
+      setError(message)
+      toast.error(message)
       return
     }
 
@@ -59,9 +63,11 @@ const EditJob = () => {
       setSaving(true)
       await jobsApi.updateJob(id, form)
       setSuccess('Job updated successfully! Redirecting...')
+      toast.success('Job updated successfully!')
       setTimeout(() => navigate(`/jobs/${id}`), 1000)
     } catch (submitError) {
       setError(submitError.message)
+      toast.error(submitError.message || 'Failed to update job.')
     } finally {
       setSaving(false)
     }

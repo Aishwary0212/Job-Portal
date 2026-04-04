@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import { jobsApi } from '../utils/api'
 import AppNavbar from '../components/AppNavbar'
 
@@ -27,7 +28,9 @@ const CreateJob = () => {
     setSuccess('')
 
     if (!form.title.trim() || !form.company.trim() || !form.location.trim()) {
-      setError('Please fill in title, company, and location.')
+      const message = 'Please fill in title, company, and location.'
+      setError(message)
+      toast.error(message)
       return
     }
 
@@ -35,9 +38,11 @@ const CreateJob = () => {
       setLoading(true)
       await jobsApi.createJob(form)
       setSuccess('Job created successfully! Redirecting...')
+      toast.success('Job created successfully!')
       setTimeout(() => navigate('/jobs'), 1000)
     } catch (submitError) {
       setError(submitError.message)
+      toast.error(submitError.message || 'Failed to create job.')
     } finally {
       setLoading(false)
     }
