@@ -1,0 +1,183 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f5f9;
+}
+
+.admin-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.admin-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2563eb;
+  color: white;
+  padding: 12px 20px;
+}
+
+.admin-nav button {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.admin-nav button:hover {
+  opacity: 0.9;
+}
+
+.admin-body {
+  display: flex;
+  flex: 1;
+}
+
+.admin-sidebar {
+  width: 200px;
+  background: #1e293b;
+  color: white;
+  padding: 15px;
+}
+
+.admin-sidebar div {
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-sidebar div:hover {
+  background: #334155;
+}
+
+.admin-main {
+  flex: 1;
+  padding: 20px;
+}
+
+h2 {
+  color: #1e293b;
+}
+.cards {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.card {
+  flex: 1;
+  min-width: 180px;
+  padding: 15px;
+  color: white;
+  text-align: center;
+  border-radius: 5px;
+}
+
+.card.blue {
+  background: #2563eb;
+}
+
+.card.green {
+  background: #16a34a;
+}
+
+.card.orange {
+  background: #f59e0b;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  margin-top: 10px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+th {
+  background: #e2e8f0;
+  padding: 10px;
+  text-align: left;
+}
+
+td {
+  padding: 10px;
+  border-top: 1px solid #eee;
+}
+
+tr:hover {
+  background: #f8fafc;
+}
+
+button {
+  padding: 5px 10px;
+  margin: 3px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-approve {
+  background: rgb(41, 170, 41);
+  color: black;
+}
+.button-reject{
+  background: rgb(241, 37, 37);
+  color: black;
+}
+.button-delete{
+  background: rgb(241, 37, 37);
+  color: black;
+}
+.button-add{
+  background: rgb(73, 73, 247);
+  color: black;
+}
+.button-save{
+  background: rgb(73, 73, 247);
+  color: black;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+input {
+  padding: 6px 8px;
+  margin: 5px 5px 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.admin-main p {
+  margin-bottom: 8px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+
+@media (max-width: 768px) {
+  .admin-body {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .admin-sidebar div {
+    margin: 0;
+  }
+
+  .cards {
+    flex-direction: column;
+  }
+}
