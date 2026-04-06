@@ -22,9 +22,10 @@ const Home = () => {
             Whether you are a fresher or an experienced professional, you can discover
             thousands of job opportunities tailored to your skills and interests.
 
-            Recruiters can easily post jobs, manage applications, and find the right
-            candidates, while job seekers can apply, track applications, and update their
-            profiles effortlessly.
+            Recruiters can register, create a company profile, post jobs, review applicants,
+            and accept or reject candidates directly from their dashboard. Candidates can
+            apply, track applications, and update their profiles effortlessly, while admins
+            keep platform control available as an optional higher-privilege role.
           </p>
 
           <button
@@ -37,6 +38,31 @@ const Home = () => {
 
         <div className="hero-right">
           <img src="/logo2.png" alt="hero" className="hero-img" />
+        </div>
+      </section>
+
+      <section className="role-highlights">
+        <div className="role-card recruiter-card">
+          <h2>Recruiter Dashboard</h2>
+          <ul>
+            <li>Register / Login</li>
+            <li>Create company profile</li>
+            <li>Post jobs</li>
+            <li>Edit/Delete jobs</li>
+            <li>View applicants</li>
+            <li>Accept/Reject candidates</li>
+          </ul>
+          <p className="role-note">Example features: dashboard stats, job management, application handling.</p>
+        </div>
+
+        <div className="role-card admin-card">
+          <h2>Admin (Optional)</h2>
+          <ul>
+            <li>Manage users</li>
+            <li>Remove fake jobs</li>
+            <li>Platform analytics</li>
+          </ul>
+          <p className="role-note">Admin remains the optional platform oversight role above recruiter access.</p>
         </div>
       </section>
 

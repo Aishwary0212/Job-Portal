@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import './AdminDashboard.css'
-import { applicationsApi, jobsApi } from '../../utils/api'
-import { clearAuthData } from '../../utils/auth'
+import { applicationsApi, authApi, jobsApi } from '../../utils/api'
+import { clearAuthData, getStoredUser } from '../../utils/auth'
 
 const initialJobForm = {
   title: '',
@@ -25,6 +25,7 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('stats')
   const [jobs, setJobs] = useState([])
   const [applications, setApplications] = useState([])
+  const [users, setUsers] = useState([])
   const [newJob, setNewJob] = useState(initialJobForm)
   const [showForm, setShowForm] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -33,18 +34,22 @@ const AdminDashboard = () => {
   const [formError, setFormError] = useState('')
   const [saving, setSaving] = useState(false)
   const [updatingId, setUpdatingId] = useState('')
+  const [userActionId, setUserActionId] = useState('')
+  const currentUser = getStoredUser()
 
   const loadAdminData = async () => {
     try {
       setLoading(true)
       setError('')
       setSuccess('')
-      const [jobsData, applicationsData] = await Promise.all([
+      const [jobsData, applicationsData, usersData] = await Promise.all([
         jobsApi.getJobs(),
-        applicationsApi.getAll()
+        applicationsApi.getAll(),
+        authApi.getUsers()
       ])
       setJobs(jobsData)
       setApplications(applicationsData)
+      setUsers(usersData)
     } catch (loadError) {
       setError(loadError.message)
       toast.error(loadError.message || 'Failed to load admin data.')
@@ -132,6 +137,42 @@ const AdminDashboard = () => {
   const approvedCount = applications.filter((application) => application.status === 'Approved').length
   const pendingCount = applications.filter((application) => application.status === 'Pending').length
 
+  const updateUserRole = async (id, role) => {
+    try {
+      setUserActionId(id)
+      setError('')
+      setSuccess('')
+      const updatedUser = await authApi.updateUserRole(id, role)
+      setUsers((currentUsers) =>
+        currentUsers.map((user) => (user._id === id ? updatedUser : user))
+      )
+      setSuccess('User role updated successfully.')
+      toast.success('User role updated successfully!')
+    } catch (updateError) {
+      setError(updateError.message)
+      toast.error(updateError.message || 'Failed to update user role.')
+    } finally {
+      setUserActionId('')
+    }
+  }
+
+  const deleteUser = async (id) => {
+    try {
+      setUserActionId(id)
+      setError('')
+      setSuccess('')
+      await authApi.deleteUser(id)
+      setUsers((currentUsers) => currentUsers.filter((user) => user._id !== id))
+      setSuccess('User deleted successfully.')
+      toast.success('User deleted successfully!')
+    } catch (deleteError) {
+      setError(deleteError.message)
+      toast.error(deleteError.message || 'Failed to delete user.')
+    } finally {
+      setUserActionId('')
+    }
+  }
+
   return (
     <div className="admin-wrapper">
       <nav className="admin-nav">
@@ -142,6 +183,7 @@ const AdminDashboard = () => {
       <div className="admin-body">
         <aside className="admin-sidebar">
           <div onClick={() => setActiveTab('stats')}>Dashboard</div>
+          <div onClick={() => setActiveTab('users')}>Users</div>
           <div onClick={() => setActiveTab('jobs')}>Jobs</div>
           <div onClick={() => setActiveTab('apps')}>Applications</div>
         </aside>
@@ -175,7 +217,70 @@ const AdminDashboard = () => {
                   <h3>{approvedCount}</h3>
                   <p>Approved Candidates</p>
                 </div>
+
+                <div className="card green">
+                  <h3>{users.length}</h3>
+                  <p>Total Users</p>
+                </div>
               </div>
+            </div>
+          )}
+
+          {!loading && !error && activeTab === 'users' && (
+            <div>
+              <h2>Manage Users</h2>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user._id}>
+                      <td>{user.name || user.username || 'User'}</td>
+                      <td>{user.email}</td>
+                      <td>
+                        <select
+                          className="admin-select"
+                          value={user.role}
+                          disabled={userActionId === user._id}
+                          onChange={(event) => updateUserRole(user._id, event.target.value)}
+                        >
+                          <option value="candidate">candidate</option>
+                          <option value="recruiter">recruiter</option>
+                          <option value="admin">admin</option>
+                        </select>
+                      </td>
+                      <td>
+                        {user.createdAt
+                          ? new Date(user.createdAt).toLocaleDateString('en-IN', {
+                              month: 'short', day: 'numeric', year: 'numeric'
+                            })
+                          : 'N/A'}
+                      </td>
+                      <td>
+                        <button
+                          className="button-delete"
+                          disabled={userActionId === user._id || currentUser?._id === user._id}
+                          onClick={() => deleteUser(user._id)}
+                        >
+                          {currentUser?._id === user._id
+                            ? 'Current Admin'
+                            : userActionId === user._id
+                              ? 'Working...'
+                              : 'Delete'}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
 

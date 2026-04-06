@@ -170,9 +170,87 @@ body {
 .empty-icon { font-size: 48px; }
 .empty-state p { font-size: 15px; }
 
+.dashboard-message {
+  margin: 0 0 18px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.dashboard-message.error {
+  color: #b91c1c;
+}
+
+.applications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.application-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: #f8fafc;
+  border: 1px solid #dbeafe;
+  border-radius: 14px;
+  padding: 18px;
+}
+
+.application-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.application-title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.application-meta,
+.application-status {
+  margin: 0;
+  color: #334155;
+}
+
+.application-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.status-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.status-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.status-btn.approve {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-btn.reject {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 @media (max-width: 768px) {
   .sidebar { width: 180px; }
   .dash-main { padding: 20px 16px; }
   .profile-content { flex-direction: column; align-items: center; }
   .profile-card { padding: 24px 20px; }
+  .application-card { flex-direction: column; align-items: flex-start; }
+  .application-actions { width: 100%; }
 }

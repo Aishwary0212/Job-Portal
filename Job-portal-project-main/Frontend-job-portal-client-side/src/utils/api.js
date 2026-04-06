@@ -51,6 +51,14 @@ export const authApi = {
   updateProfile: (payload) => apiRequest(API_ENDPOINTS.updateProfile, {
     method: 'PUT',
     body: JSON.stringify(payload)
+  }),
+  getUsers: () => apiRequest(API_ENDPOINTS.users),
+  updateUserRole: (id, role) => apiRequest(API_ENDPOINTS.updateUserRole(id), {
+    method: 'PUT',
+    body: JSON.stringify({ role })
+  }),
+  deleteUser: (id) => apiRequest(API_ENDPOINTS.deleteUser(id), {
+    method: 'DELETE'
   })
 }
 

@@ -65,11 +65,7 @@ const JobDetails = () => {
     }
   }
 
-  const canEdit =
-    user?.role === 'admin' ||
-    (user?.role === 'recruiter' &&
-      job?.createdBy?._id &&
-      user?._id === job.createdBy._id)
+  const canManageJob = ['recruiter', 'admin'].includes(user?.role)
 
   return (
     <>
@@ -121,7 +117,7 @@ const JobDetails = () => {
               <button className="auth-btn" type="button" onClick={() => navigate('/jobs')}>
                 Back to Jobs
               </button>
-              {canEdit ? (
+              {canManageJob ? (
                 <button className="auth-btn" type="button" onClick={() => navigate(`/jobs/${job._id}/edit`)}>
                   Edit Job
                 </button>

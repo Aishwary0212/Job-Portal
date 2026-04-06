@@ -90,6 +90,13 @@ export const updateApplicationStatus = async (req, res) => {
       return res.status(404).json({ message: "Application not found" });
     }
 
+    if (
+      req.user.role === "recruiter" &&
+      application.recruiter.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({ message: "You can only manage applications for your own jobs" });
+    }
+
     application.status = status;
     await application.save();
 

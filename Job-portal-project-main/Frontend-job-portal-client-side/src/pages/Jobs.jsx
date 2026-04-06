@@ -48,11 +48,7 @@ const Jobs = () => {
     return new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
   })
 
-  const canEditJob = (job) =>
-    (user?.role === 'admin') ||
-    (user?.role === 'recruiter' &&
-      job?.createdBy?._id &&
-      user?._id === job.createdBy._id)
+  const canManageJobs = ['recruiter', 'admin'].includes(user?.role)
 
   const isAppliedJob = (job) =>
     user?.role === 'candidate' &&
@@ -137,7 +133,7 @@ const Jobs = () => {
 
               <div className="card-btns">
                 <button className="btn-details" onClick={() => navigate(`/jobs/${job._id}`)}>Details</button>
-                {canEditJob(job) ? (
+                {canManageJobs ? (
                   <button className="btn-apply" onClick={() => navigate(`/jobs/${job._id}/edit`)}>
                     Edit
                   </button>

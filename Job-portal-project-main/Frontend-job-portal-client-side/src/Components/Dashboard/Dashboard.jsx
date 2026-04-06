@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import toast from 'react-hot-toast'
 import './Dashboard.css'
 import { applicationsApi, authApi } from '../../utils/api'
 import { clearAuthData, getStoredUser, setAuthData } from '../../utils/auth'
@@ -11,6 +12,8 @@ const Dashboard = () => {
   const [sidebarOpen] = useState(true)
   const [user, setUser] = useState(() => getStoredUser() || {})
   const [applications, setApplications] = useState([])
+  const [applicationError, setApplicationError] = useState('')
+  const [updatingId, setUpdatingId] = useState('')
 
   useEffect(() => {
     const syncProfile = async () => {
@@ -54,19 +57,53 @@ const Dashboard = () => {
     const loadApplications = async () => {
       if (!user._id || user.role === 'admin') {
         setApplications([])
+        setApplicationError('')
         return
       }
 
       try {
+        setApplicationError('')
+
+        if (user.role === 'recruiter') {
+          const recruiterApplications = await applicationsApi.getMine()
+          setApplications(recruiterApplications)
+          return
+        }
+
         const data = await applicationsApi.getMine()
         setApplications(data)
       } catch {
         setApplications([])
+        setApplicationError(
+          user.role === 'recruiter'
+            ? 'Unable to load applicants right now.'
+            : 'Unable to load applications right now.'
+        )
       }
     }
 
     loadApplications()
   }, [user._id, user.role])
+
+  const updateApplicationStatus = async (applicationId, status) => {
+    try {
+      setUpdatingId(applicationId)
+      setApplicationError('')
+      await applicationsApi.updateStatus(applicationId, status)
+      setApplications((currentApplications) =>
+        currentApplications.map((application) =>
+          application._id === applicationId ? { ...application, status } : application
+        )
+      )
+      toast.success(`Candidate ${status === 'Approved' ? 'accepted' : 'rejected'} successfully.`)
+    } catch (error) {
+      const message = error.message || 'Failed to update candidate status.'
+      setApplicationError(message)
+      toast.error(message)
+    } finally {
+      setUpdatingId('')
+    }
+  }
 
   return (
     <div className="dash-wrapper">
@@ -93,7 +130,7 @@ const Dashboard = () => {
                 className={`sidebar-item ${activeTab === 'applications' ? 'active' : ''}`}
                 onClick={() => setActiveTab('applications')}
               >
-                <span className="sidebar-icon">💼</span> Applications
+                <span className="sidebar-icon">💼</span> {user.role === 'recruiter' ? 'Applicants' : 'Applications'}
               </div>
               <div
                 className="sidebar-item"
@@ -171,6 +208,7 @@ const Dashboard = () => {
               <h2 className="profile-title">
                 {user.role === 'recruiter' ? 'Job Applicants' : 'My Applications'}
               </h2>
+              {applicationError && <p className="dashboard-message error">{applicationError}</p>}
               {(() => {
                 if (user.role === 'recruiter') {
                   if (applications.length === 0) {
@@ -183,13 +221,33 @@ const Dashboard = () => {
                   }
 
                   return (
-                    <div className="profile-info">
+                    <div className="applications-list">
                       {applications.map((application) => (
-                        <div key={application._id} className="info-row">
-                          <span className="info-label">{application.candidate?.name || 'Candidate'} :</span>
-                          <span className="info-value">
-                            {application.job?.title || 'Job'} ({application.status})
-                          </span>
+                        <div key={application._id} className="application-card">
+                          <div className="application-copy">
+                            <p className="application-title">{application.candidate?.name || 'Candidate'}</p>
+                            <p className="application-meta">{application.candidate?.email || 'No email available'}</p>
+                            <p className="application-meta">Applied for: {application.job?.title || 'Job'}</p>
+                            <p className="application-status">Status: {application.status || 'Pending'}</p>
+                          </div>
+                          <div className="application-actions">
+                            <button
+                              className="status-btn approve"
+                              type="button"
+                              disabled={updatingId === application._id || application.status === 'Approved'}
+                              onClick={() => updateApplicationStatus(application._id, 'Approved')}
+                            >
+                              {updatingId === application._id && application.status !== 'Approved' ? 'Updating...' : 'Accept'}
+                            </button>
+                            <button
+                              className="status-btn reject"
+                              type="button"
+                              disabled={updatingId === application._id || application.status === 'Rejected'}
+                              onClick={() => updateApplicationStatus(application._id, 'Rejected')}
+                            >
+                              {updatingId === application._id && application.status !== 'Rejected' ? 'Updating...' : 'Reject'}
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
