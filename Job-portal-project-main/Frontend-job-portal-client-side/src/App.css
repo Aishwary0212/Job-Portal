@@ -61,7 +61,8 @@ body {
   margin-bottom: 8px;
 }
 
-.form-field input {
+.form-field input,
+.form-field select {
   width: 100%;
   border: 1.5px solid #cdd5e0;
   border-radius: 6px;
@@ -78,7 +79,8 @@ body {
   color: #aab0be;
 }
 
-.form-field input:focus {
+.form-field input:focus,
+.form-field select:focus {
   border-color: #6d28d9;
 }
 

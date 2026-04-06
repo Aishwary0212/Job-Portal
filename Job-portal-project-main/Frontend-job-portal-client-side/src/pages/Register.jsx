@@ -7,7 +7,13 @@ import { setAuthData } from '../utils/auth'
 const Register = () => {
   const navigate = useNavigate()
 
-  const [form, setForm]       = useState({ username: '', email: '', password: '', confirmPassword: '' })
+  const [form, setForm]       = useState({
+    username: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    role: 'candidate'
+  })
   const [error, setError]     = useState('')
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
@@ -44,7 +50,8 @@ const Register = () => {
       const data = await authApi.register({
         username: form.username,
         email: form.email,
-        password: form.password
+        password: form.password,
+        role: form.role
       })
 
       setAuthData({
@@ -93,6 +100,14 @@ const Register = () => {
             <label>Email</label>
             <input type="email" name="email" placeholder="Email@example.com"
               value={form.email} onChange={handleChange} />
+          </div>
+
+          <div className="form-field">
+            <label>Role</label>
+            <select name="role" value={form.role} onChange={handleChange}>
+              <option value="candidate">Candidate</option>
+              <option value="recruiter">Recruiter</option>
+            </select>
           </div>
 
           <div className="form-field">
